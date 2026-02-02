@@ -1,0 +1,1059 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard • Redesign</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+      :root {
+        --bg: #0c121d;
+        --panel: #0f1724;
+        --muted: #8892a6;
+        --text: #e8eefc;
+        --accent: #5ce1e6;
+        --accent-2: #ff8f70;
+        --accent-3: #7c7bff;
+        --success: #3dd598;
+        --warning: #f2c94c;
+        --danger: #ef476f;
+        --border: rgba(255, 255, 255, 0.08);
+        --card-radius: 14px;
+        --shadow: 0 20px 70px rgba(0, 0, 0, 0.35);
+      }
+      :root.light-mode {
+        --bg: #ffffff;
+        --panel: #f8fafc;
+        --muted: #718096;
+        --text: #1a202c;
+        --accent: #0891b2;
+        --accent-2: #ea580c;
+        --accent-3: #4f46e5;
+        --success: #059669;
+        --warning: #d97706;
+        --danger: #dc2626;
+        --border: rgba(0, 0, 0, 0.1);
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Space Grotesk", sans-serif;
+        background:
+          radial-gradient(
+            circle at 10% 20%,
+            rgba(124, 123, 255, 0.25),
+            transparent 22%
+          ),
+          radial-gradient(
+            circle at 80% 0%,
+            rgba(92, 225, 230, 0.28),
+            transparent 25%
+          ),
+          linear-gradient(135deg, #0a101a 0%, #0d1522 60%, #0c121d 100%);
+        color: var(--text);
+        transition:
+          background 0.3s ease,
+          color 0.3s ease;
+      }
+      body.light-mode {
+        background:
+          radial-gradient(
+            circle at 10% 20%,
+            rgba(79, 70, 229, 0.06),
+            transparent 22%
+          ),
+          radial-gradient(
+            circle at 80% 0%,
+            rgba(8, 145, 178, 0.06),
+            transparent 25%
+          ),
+          linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        min-height: 100vh;
+      }
+      aside {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        padding: 22px 18px;
+        background: rgba(12, 17, 29, 0.9);
+        border-right: 1px solid var(--border);
+        backdrop-filter: blur(10px);
+        transition:
+          background 0.3s ease,
+          border 0.3s ease;
+      }
+      :root.light-mode aside {
+        background: #f8fafc;
+        border-right-color: var(--border);
+      }
+      .brand-logo {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: linear-gradient(145deg, #0891b2, #4f46e5);
+        display: grid;
+        place-items: center;
+        color: #ffffff;
+        font-weight: 700;
+        transition: background 0.3s ease;
+      }
+      .brand h1 {
+        font-size: 17px;
+        letter-spacing: 0.6px;
+        margin: 0;
+      }
+      nav {
+        display: grid;
+        gap: 6px;
+      }
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        color: var(--muted);
+        border: 1px solid transparent;
+        transition: 0.2s ease;
+      }
+      .nav-item.active,
+      .nav-item:hover {
+        color: var(--text);
+        border-color: var(--border);
+        background: rgba(255, 255, 255, 0.03);
+      }
+      .nav-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
+      }
+      main {
+        padding: 26px 28px 40px;
+        display: grid;
+        gap: 20px;
+        grid-template-rows: auto auto 1fr;
+      }
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 16px 18px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border);
+        border-radius: var(--card-radius);
+        box-shadow: var(--shadow);
+      }
+      .filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+      .select {
+        appearance: none;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 10px 12px;
+        border-radius: 10px;
+        font-size: 14px;
+        min-width: 120px;
+      }
+      .pill-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text);
+        padding: 9px 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.15s ease;
+      }
+      .pill-button.active {
+        border-color: var(--accent);
+        box-shadow: 0 6px 30px rgba(92, 225, 230, 0.25);
+      }
+      .pill-button:hover {
+        transform: translateY(-1px);
+      }
+      .avatar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border);
+      }
+      .avatar img {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 1px solid var(--border);
+      }
+      .theme-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border);
+        cursor: pointer;
+        color: var(--text);
+        transition: all 0.3s ease;
+        padding: 0;
+      }
+      .theme-toggle:hover {
+        background: rgba(255, 255, 255, 0.08);
+        transform: scale(1.05);
+      }
+      .theme-icon {
+        width: 20px;
+        height: 20px;
+        color: var(--accent);
+      }
+      .theme-icon.hidden {
+        display: none;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 14px;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: var(--card-radius);
+        padding: 16px 18px;
+        box-shadow: var(--shadow);
+        transition:
+          background 0.3s ease,
+          border 0.3s ease,
+          box-shadow 0.3s ease;
+      }
+      .stat {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .stat h3 {
+        margin: 0;
+        font-size: 14px;
+        color: var(--muted);
+      }
+      .stat .value {
+        font-size: 32px;
+        font-weight: 700;
+        margin-top: 6px;
+      }
+      .badge {
+        padding: 6px 10px;
+        border-radius: 10px;
+        font-size: 12px;
+      }
+      .badge.success {
+        background: rgba(5, 150, 105, 0.1);
+        color: var(--success);
+      }
+      .badge.warning {
+        background: rgba(217, 119, 6, 0.1);
+        color: var(--warning);
+      }
+      .badge.danger {
+        background: rgba(220, 38, 38, 0.1);
+        color: var(--danger);
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: var(--card-radius);
+        box-shadow: var(--shadow);
+        padding: 12px;
+        transition:
+          background 0.3s ease,
+          border 0.3s ease,
+          box-shadow 0.3s ease;
+      }
+      .panel h2 {
+        margin: 0 0 8px;
+        font-size: 14px;
+        letter-spacing: 0.3px;
+        color: var(--text);
+      }
+      .chart-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 14px;
+        align-items: stretch;
+      }
+      .table-wrap {
+        overflow: hidden;
+        border-radius: var(--card-radius);
+        border: 1px solid var(--border);
+        background: var(--panel);
+        box-shadow: var(--shadow);
+        transition:
+          background 0.3s ease,
+          border 0.3s ease;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        color: var(--text);
+      }
+      thead {
+        background: rgba(0, 0, 0, 0.02);
+      }
+      th,
+      td {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--border);
+        font-size: 13px;
+        text-align: left;
+      }
+      tr:hover td {
+        background: rgba(0, 0, 0, 0.02);
+      }
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 6px;
+      }
+      .status-online {
+        background: var(--success);
+      }
+      .status-offline {
+        background: var(--warning);
+      }
+      .status-problem {
+        background: var(--danger);
+      }
+      .toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        gap: 10px;
+      }
+      .search {
+        flex: 1;
+        position: relative;
+      }
+      .search input {
+        width: 100%;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px 12px 10px 34px;
+        color: var(--text);
+        font-size: 14px;
+      }
+      .search svg {
+        position: absolute;
+        left: 10px;
+        top: 10px;
+        width: 16px;
+        height: 16px;
+        fill: var(--muted);
+      }
+      .table-footer {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 16px 14px;
+        align-items: center;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .pagination {
+        display: flex;
+        gap: 8px;
+      }
+      .page-btn {
+        min-width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: var(--panel);
+        color: var(--text);
+        cursor: pointer;
+      }
+      .page-btn.active {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        z-index: 50;
+      }
+      .modal {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 18px;
+        width: min(520px, 100%);
+        box-shadow: var(--shadow);
+        color: var(--text);
+        transition:
+          background 0.3s ease,
+          border 0.3s ease;
+      }
+      .modal h3 {
+        margin: 0 0 12px;
+      }
+      .modal-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        font-size: 14px;
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border);
+        font-size: 12px;
+      }
+      @media (max-width: 900px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        aside {
+          position: relative;
+          height: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <aside>
+        <div class="brand">
+          <div class="brand-logo">DW</div>
+          <div>
+            <h1>Water XYZ</h1>
+            <div style="color: var(--muted); font-size: 12px">tag line</div>
+          </div>
+        </div>
+        <nav>
+          <a class="nav-item active" href="#"
+            ><span class="nav-dot"></span>Dashboard</a
+          >
+          <a class="nav-item" href="#">Billing Dashboard</a>
+          <a class="nav-item" href="#">Test Dashboard</a>
+          <a class="nav-item" href="#">Device Visit Log</a>
+          <a class="nav-item" href="#">Oracle DB Log</a>
+          <a class="nav-item" href="#">Oracle Billing</a>
+          <a class="nav-item" href="#">Abnormal Reading</a>
+          <a class="nav-item" href="#">Flat Reading</a>
+          <a class="nav-item" href="#">Survey Meters</a>
+          <a class="nav-item" href="#">Profile</a>
+          <a class="nav-item" href="#">Manage</a>
+          <a class="nav-item" href="#">Report</a>
+          <a class="nav-item" href="#">Logout</a>
+        </nav>
+      </aside>
+
+      <main>
+        <div class="topbar">
+          <div class="filters">
+            <select id="dmaSelect" class="select"></select>
+            <select id="yearSelect" class="select"></select>
+            <select id="monthSelect" class="select"></select>
+            <div class="pill-button" data-filter="all">All</div>
+            <div class="pill-button" data-filter="online">Online</div>
+            <div class="pill-button" data-filter="offline">Offline</div>
+            <div class="pill-button" data-filter="problem">Problem</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px">
+            <button id="themeToggle" class="theme-toggle" title="Toggle theme">
+              <svg
+                id="sunIcon"
+                class="theme-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+              </svg>
+              <svg
+                id="moonIcon"
+                class="theme-icon hidden"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+                ></path>
+              </svg>
+            </button>
+            <div class="avatar">
+              <img
+                src="https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=crop&w=120&q=80"
+                alt="user"
+              />
+              <div>
+                <div style="font-weight: 600; font-size: 14px">
+                  Zone 5 Admin
+                </div>
+                <div style="color: var(--muted); font-size: 12px">
+                  wasa zone 5
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid" id="stats"></div>
+
+        <div class="chart-row">
+          <div class="panel">
+            <h2>Monthly Consumption</h2>
+            <canvas id="barChart" height="120"></canvas>
+          </div>
+          <div
+            class="panel"
+            style="display: flex; flex-direction: column; align-items: center"
+          >
+            <h2>Status Mix</h2>
+            <div
+              style="
+                width: 100%;
+                max-width: 350px;
+                display: flex;
+                justify-content: center;
+              "
+            >
+              <canvas id="doughnutChart" height="120" width="350"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="toolbar">
+            <div style="font-weight: 700; letter-spacing: 0.3px">Devices</div>
+            <div class="search">
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.71.71l.27.28v.79l5 5 1.49-1.49-5-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"
+                />
+              </svg>
+              <input
+                id="searchInput"
+                type="text"
+                placeholder="Search address or account"
+              />
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table id="deviceTable">
+              <thead>
+                <tr>
+                  <th>A/C No</th>
+                  <th>Address</th>
+                  <th>Prev Date</th>
+                  <th>Prev Reading (m3)</th>
+                  <th>Curr Reading (m3)</th>
+                  <th>Curr Date</th>
+                  <th>Consumption (m3)</th>
+                  <th>Problem</th>
+                  <th>Status</th>
+                  <th>Info</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+            <div class="table-footer">
+              <div id="tableInfo"></div>
+              <div class="pagination" id="pagination"></div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div class="modal-backdrop" id="modal">
+      <div class="modal">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+          "
+        >
+          <h3 id="modalTitle">Device</h3>
+          <button class="page-btn" onclick="closeModal()">Close</button>
+        </div>
+        <div class="modal-grid" id="modalGrid"></div>
+        <div
+          style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap"
+          id="modalChips"
+        ></div>
+      </div>
+    </div>
+
+    <script>
+      const data = [
+        {
+          account: "0515758649",
+          address: "HEAD QUATER, CHAIRMAN BARI, BANANI, DHAKA",
+          prevDate: "2025-12-31 23:50:38",
+          prevReading: 26482.4,
+          currReading: 26850.3,
+          currDate: "2026-01-22 13:23:38",
+          consumption: 367.9,
+          problem: "No Problem",
+          status: "online",
+        },
+        {
+          account: "0515023737",
+          address: "PLOT-7-9, HOTEL SONARGAON RD, KAWRANBAZAR, TEJGAON, DHAKA",
+          prevDate: "2025-12-27 08:12:02",
+          prevReading: 47317.0,
+          currReading: 0,
+          currDate: "0",
+          consumption: 0,
+          problem: "No Problem",
+          status: "offline",
+        },
+        {
+          account: "0515023490",
+          address: "18/1, TEJGAON I/A, DHAKA-1215",
+          prevDate: "2025-12-31 23:57:57",
+          prevReading: -1627591.02,
+          currReading: 154071.5,
+          currDate: "2026-01-22 13:25:17",
+          consumption: 1781662.52,
+          problem: "No Problem",
+          status: "online",
+        },
+        {
+          account: "0510013802",
+          address: "HOUSE-149, WEST ARJATPARA, MOHAKHALI, DHAKA",
+          prevDate: "2025-12-31 23:55:20",
+          prevReading: 36509.1,
+          currReading: 36981.7,
+          currDate: "2026-01-22 13:25:49",
+          consumption: 472.6,
+          problem: "No Problem",
+          status: "online",
+        },
+        {
+          account: "0508763433",
+          address:
+            "SHANTA HOLDINGS LTD, PLOT-190, TEJGAON INDUSTRIAL AREA, DHAKA",
+          prevDate: "2025-12-31 23:59:27",
+          prevReading: 30199.32,
+          currReading: 30706.93,
+          currDate: "2026-01-22 13:22:54",
+          consumption: 507.61,
+          problem: "No Problem",
+          status: "online",
+        },
+        {
+          account: "0508046500",
+          address: "203, 204, TEJGAON I/A, DHAKA",
+          prevDate: "0",
+          prevReading: 0,
+          currReading: 0,
+          currDate: "0",
+          consumption: 0,
+          problem: "No Problem",
+          status: "offline",
+        },
+        {
+          account: "0508002520",
+          address: "HOUSE-346, TEJGAON I/A, TEJGAON, DHAKA",
+          prevDate: "2025-12-31 23:57:24",
+          prevReading: 90900.3,
+          currReading: 91857.1,
+          currDate: "2026-01-22 13:27:09",
+          consumption: 956.8,
+          problem: "No Problem",
+          status: "online",
+        },
+        {
+          account: "0506404020",
+          address: "HOUSE-16/A, OLD D.O.H.S, BANANI, DHAKA",
+          prevDate: "2025-12-31 23:59:49",
+          prevReading: 166107.06,
+          currReading: 82585.29,
+          currDate: "2026-01-20 01:07:23",
+          consumption: -83521.77,
+          problem: "No Problem",
+          status: "online",
+        },
+        {
+          account: "0506280767",
+          address: "HOUSE-18/A, OLD D.O.H.S, BANANI, DHAKA",
+          prevDate: "2025-12-31 23:59:37",
+          prevReading: 7738.1,
+          currReading: 8063.0,
+          currDate: "2026-01-13 06:51:30",
+          consumption: 324.9,
+          problem: "No Problem",
+          status: "offline",
+        },
+        {
+          account: "0506075716",
+          address: "HOUSE-80/A, OLD DOHS, BANANI, DHAKA-1206",
+          prevDate: "2025-12-31 23:51:07",
+          prevReading: 17100.4,
+          currReading: 17323.6,
+          currDate: "2026-01-16 01:12:38",
+          consumption: 223.2,
+          problem: "No Problem",
+          status: "online",
+        },
+      ];
+
+      const dmas = ["All", "308", "501"];
+      const months = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
+      const years = [2024, 2025, 2026];
+
+      const dmaSelect = document.getElementById("dmaSelect");
+      const monthSelect = document.getElementById("monthSelect");
+      const yearSelect = document.getElementById("yearSelect");
+      const statsEl = document.getElementById("stats");
+      const searchInput = document.getElementById("searchInput");
+      const tableBody = document.querySelector("#deviceTable tbody");
+      const tableInfo = document.getElementById("tableInfo");
+      const pagination = document.getElementById("pagination");
+      const modal = document.getElementById("modal");
+      const modalTitle = document.getElementById("modalTitle");
+      const modalGrid = document.getElementById("modalGrid");
+      const modalChips = document.getElementById("modalChips");
+      const pills = Array.from(document.querySelectorAll(".pill-button"));
+      let filterStatus = "all";
+      let currentPage = 1;
+      const pageSize = 6;
+
+      // init selects
+      dmas.forEach((d, i) => {
+        const opt = document.createElement("option");
+        opt.value = i;
+        opt.textContent = d;
+        dmaSelect.appendChild(opt);
+      });
+      years.forEach((y) => {
+        const opt = document.createElement("option");
+        opt.value = y;
+        opt.textContent = y;
+        yearSelect.appendChild(opt);
+      });
+      months.forEach((m, idx) => {
+        const opt = document.createElement("option");
+        opt.value = idx + 1;
+        opt.textContent = m;
+        monthSelect.appendChild(opt);
+      });
+      const today = new Date();
+      yearSelect.value = today.getFullYear();
+      monthSelect.value = today.getMonth() + 1;
+      dmaSelect.value = 0;
+
+      pills.forEach((pill) =>
+        pill.addEventListener("click", () => {
+          pills.forEach((p) => p.classList.remove("active"));
+          pill.classList.add("active");
+          filterStatus = pill.dataset.filter;
+          currentPage = 1;
+          renderAll();
+        }),
+      );
+      pills[0].classList.add("active");
+
+      searchInput.addEventListener("input", () => {
+        currentPage = 1;
+        renderAll();
+      });
+
+      dmaSelect.addEventListener("change", renderAll);
+      monthSelect.addEventListener("change", renderAll);
+      yearSelect.addEventListener("change", renderAll);
+
+      function filterData() {
+        const query = searchInput.value.toLowerCase();
+        return data.filter((item) => {
+          const matchesStatus =
+            filterStatus === "all"
+              ? true
+              : filterStatus === "problem"
+                ? item.problem !== "No Problem"
+                : item.status === filterStatus;
+          const matchesSearch =
+            item.address.toLowerCase().includes(query) ||
+            item.account.includes(query);
+          return matchesStatus && matchesSearch;
+        });
+      }
+
+      function renderTable() {
+        const filtered = filterData();
+        const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+        currentPage = Math.min(currentPage, totalPages);
+        const start = (currentPage - 1) * pageSize;
+        const rows = filtered.slice(start, start + pageSize);
+
+        tableBody.innerHTML = rows
+          .map(
+            (row) => `
+        <tr>
+          <td>${row.account}</td>
+          <td>${row.address}</td>
+          <td>${row.prevDate}</td>
+          <td>${row.prevReading.toFixed(2)}</td>
+          <td>${row.currReading.toFixed(2)}</td>
+          <td>${row.currDate}</td>
+          <td>${row.consumption.toFixed(2)}</td>
+          <td>${row.problem}</td>
+          <td>${statusBadge(row.status)}</td>
+          <td><button class="page-btn" onclick='openModal(${JSON.stringify(row)});'>Details</button></td>
+        </tr>
+      `,
+          )
+          .join("");
+
+        tableInfo.textContent = `Showing ${rows.length} of ${filtered.length} devices`;
+        pagination.innerHTML = "";
+        for (let i = 1; i <= totalPages; i++) {
+          const btn = document.createElement("button");
+          btn.className = "page-btn" + (i === currentPage ? " active" : "");
+          btn.textContent = i;
+          btn.onclick = () => {
+            currentPage = i;
+            renderTable();
+          };
+          pagination.appendChild(btn);
+        }
+      }
+
+      function statusBadge(status) {
+        if (status === "online")
+          return `<span class="status-dot status-online"></span>Online`;
+        if (status === "offline")
+          return `<span class="status-dot status-offline"></span>Offline`;
+        return `<span class="status-dot status-problem"></span>Problem`;
+      }
+
+      function renderStats() {
+        const filtered = filterData();
+        const total = filtered.length;
+        const online = filtered.filter((d) => d.status === "online").length;
+        const offline = filtered.filter((d) => d.status === "offline").length;
+        const problem = filtered.filter(
+          (d) => d.problem !== "No Problem",
+        ).length;
+        const cards = [
+          { label: "Installed Device", value: data.length, tone: "#7c7bff" },
+          { label: "Online", value: online, tone: "#3dd598" },
+          { label: "Offline", value: offline, tone: "#f2c94c" },
+          { label: "Problem Flags", value: problem, tone: "#ef476f" },
+        ];
+        statsEl.innerHTML = cards
+          .map(
+            (card) => `
+        <div class="card">
+          <div class="stat">
+            <div>
+              <h3>${card.label}</h3>
+              <div class="value" style="color:${card.tone}">${card.value}</div>
+            </div>
+            <div class="badge" style="border:1px solid ${card.tone}; color:${card.tone}; background: rgba(124,123,255,0.08);">${yearSelect.value}</div>
+          </div>
+        </div>
+      `,
+          )
+          .join("");
+      }
+
+      let barChart, doughnutChart;
+      function renderCharts() {
+        const monthsData = Array(12).fill(0);
+        data.forEach((d, idx) => {
+          monthsData[idx % 12] += Math.max(0, d.consumption);
+        });
+        const statusCounts = [
+          data.filter((d) => d.status === "online").length,
+          data.filter((d) => d.status === "offline").length,
+          data.filter((d) => d.problem !== "No Problem").length || 1,
+        ];
+        if (barChart) barChart.destroy();
+        if (doughnutChart) doughnutChart.destroy();
+        barChart = new Chart(document.getElementById("barChart"), {
+          type: "bar",
+          data: {
+            labels: months,
+            datasets: [
+              {
+                label: "m3 consumption",
+                data: monthsData,
+                backgroundColor: months.map(() => "rgba(92,225,230,0.35)"),
+                borderColor: "#5ce1e6",
+                borderWidth: 1.4,
+                borderRadius: 6,
+              },
+            ],
+          },
+          options: {
+            plugins: { legend: { display: false } },
+            scales: {
+              x: {
+                ticks: { color: "#aab1c7" },
+                grid: { color: "rgba(255,255,255,0.04)" },
+              },
+              y: {
+                ticks: { color: "#aab1c7" },
+                grid: { color: "rgba(255,255,255,0.04)" },
+              },
+            },
+          },
+        });
+        doughnutChart = new Chart(document.getElementById("doughnutChart"), {
+          type: "doughnut",
+          data: {
+            labels: ["Online", "Offline", "Problem"],
+            datasets: [
+              {
+                data: statusCounts,
+                backgroundColor: ["#3dd598", "#f2c94c", "#ef476f"],
+                borderWidth: 0,
+              },
+            ],
+          },
+          options: {
+            plugins: {
+              legend: { position: "bottom", labels: { color: "#aab1c7" } },
+            },
+            cutout: "65%",
+          },
+        });
+      }
+
+      function openModal(row) {
+        modal.style.display = "flex";
+        modalTitle.textContent = `Device ${row.account}`;
+        modalGrid.innerHTML = `
+        <div><strong>Address</strong><div>${row.address}</div></div>
+        <div><strong>Status</strong><div>${row.status}</div></div>
+        <div><strong>Prev Date</strong><div>${row.prevDate}</div></div>
+        <div><strong>Prev Reading</strong><div>${row.prevReading}</div></div>
+        <div><strong>Curr Date</strong><div>${row.currDate}</div></div>
+        <div><strong>Curr Reading</strong><div>${row.currReading}</div></div>
+        <div><strong>Consumption</strong><div>${row.consumption}</div></div>
+        <div><strong>Problem</strong><div>${row.problem}</div></div>
+      `;
+        modalChips.innerHTML = `
+        <span class="chip">${monthSelect.options[monthSelect.selectedIndex].text}</span>
+        <span class="chip">Year ${yearSelect.value}</span>
+        <span class="chip">DMA ${dmaSelect.options[dmaSelect.selectedIndex].text}</span>
+      `;
+      }
+      function closeModal() {
+        modal.style.display = "none";
+      }
+      window.addEventListener("click", (e) => {
+        if (e.target === modal) closeModal();
+      });
+
+      function renderAll() {
+        renderStats();
+        renderTable();
+        renderCharts();
+      }
+
+      // Theme Toggle
+      const themeToggle = document.getElementById("themeToggle");
+      const sunIcon = document.getElementById("sunIcon");
+      const moonIcon = document.getElementById("moonIcon");
+      const htmlElement = document.documentElement;
+      const body = document.body;
+
+      // Check for saved theme preference or default to dark mode
+      const savedTheme = localStorage.getItem("theme") || "dark";
+      if (savedTheme === "light") {
+        htmlElement.classList.add("light-mode");
+        body.classList.add("light-mode");
+        sunIcon.classList.add("hidden");
+        moonIcon.classList.remove("hidden");
+      }
+
+      themeToggle.addEventListener("click", () => {
+        const isLight = htmlElement.classList.toggle("light-mode");
+        body.classList.toggle("light-mode");
+
+        if (isLight) {
+          sunIcon.classList.add("hidden");
+          moonIcon.classList.remove("hidden");
+          localStorage.setItem("theme", "light");
+        } else {
+          sunIcon.classList.remove("hidden");
+          moonIcon.classList.add("hidden");
+          localStorage.setItem("theme", "dark");
+        }
+      });
+
+      renderAll();
+    </script>
+  </body>
+</html>
